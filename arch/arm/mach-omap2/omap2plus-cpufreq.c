@@ -517,7 +517,7 @@ struct opp {
         struct device_opp *dev_opp;
 };
 
-static ssize_t show_uv_mv_table(struct cpufreq_policy *policy, char *buf)
+static ssize_t show_voltage_table(struct cpufreq_policy *policy, char *buf)
 {
 	int i = 0;
 	unsigned long volt_cur;
@@ -545,7 +545,7 @@ static ssize_t show_uv_mv_table(struct cpufreq_policy *policy, char *buf)
         return out-buf;
 }
 
-static ssize_t store_uv_mv_table(struct cpufreq_policy *policy,
+static ssize_t store_voltage_table(struct cpufreq_policy *policy,
 	const char *buf, size_t count)
 {
 	int i = 0;
@@ -655,17 +655,17 @@ static ssize_t store_uv_mv_table(struct cpufreq_policy *policy,
 	return count;
 }
 
-static struct freq_attr omap_uv_mv_table = {
+static struct freq_attr omap_voltage_table = {
 	.attr = {.name = "UV_mV_table", .mode=0644,},
-	.show = show_uv_mv_table,
-	.store = store_uv_mv_table,
+	.show = show_voltage_table,
+	.store = store_voltage_table,
 };
 #endif
 
 static struct freq_attr *omap_cpufreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 #ifdef CONFIG_OMAP4_VOLTAGE_CONTROL
-	&omap_uv_mv_table,
+	&omap_voltage_table,
 #endif
 	NULL,
 };
