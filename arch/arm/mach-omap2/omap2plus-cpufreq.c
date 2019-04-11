@@ -526,7 +526,7 @@ static ssize_t show_voltage_table(struct cpufreq_policy *policy, char *buf)
 
 	/* Reverse order sysfs entries for consistency */
 	while(freq_table[i].frequency != CPUFREQ_TABLE_END)
-                i++;
+		i++;
 
 	/* For each entry in the cpufreq table, print the voltage */
 	for(i--; i >= 0; i--) {
@@ -574,17 +574,16 @@ static ssize_t store_voltage_table(struct cpufreq_policy *policy,
 			policy->cur = policy->max = policy->min = freq_table[i].frequency;
 			ret = omap_device_scale(mpu_dev, mpu_dev, freq_table[i].frequency);
 
-			/* Alter voltage. First do it in our opp */
+			/* Alter voltage. First do it in opp */
 			rcu_read_lock();
 			opp_cur = opp_find_freq_exact(mpu_dev,
 				freq_table[i].frequency*1000, true);
 			opp_cur->u_volt = volt_cur*1000;
 			rcu_read_unlock();
 
-			/* Then we need to alter voltage domains */
-			/* Save our old voltage */
+			/* Save old voltage */
 			volt_old = mpu_voltdm->vdd->volt_data[i].volt_nominal;
-			/* Change our main and dependent voltage tables */
+			/* Change main and dependent voltage tables */
 			mpu_voltdm->vdd->
 				volt_data[i].volt_nominal = volt_cur*1000;
 			mpu_voltdm->vdd->dep_vdd_info->
@@ -604,13 +603,6 @@ static ssize_t store_voltage_table(struct cpufreq_policy *policy,
 						dep_table[i].dep_vdd_volt = 1127000;
 			}
 
-			/* Alter current voltage in voltdm, if appropriate */
-			/* imoseyon - don't need it anymore
-			if(volt_old == mpu_voltdm->curr_volt->volt_nominal) {
-				mpu_voltdm->curr_volt->volt_nominal = volt_cur*1000;
-			}
-			*/
-
 			/* Non-standard sysfs interface: advance buf */
 			ret = sscanf(buf, "%s", size_cur);
 			buf += (strlen(size_cur)+1);
@@ -625,10 +617,9 @@ static ssize_t store_voltage_table(struct cpufreq_policy *policy,
 				freq_table[i].frequency >= policymin) {
 				vdata = omap_voltage_get_curr_vdata(mpu_voltdm);
 				if (!vdata) {
-				  pr_err("%s: unable to find current volt for vdd_%s\n",
+				  pr_err("%s: unable to find current voltage for vdd_%s\n",
 					__func__, mpu_voltdm->name);
 				} else {
-			         //for (j=0; j<2; j++)
 				  // if nominal volt is too large bail
 				  if (volt_old > mpu_voltdm->curr_volt->volt_nominal) {
 				    omap_sr_disable(mpu_voltdm);
@@ -638,10 +629,8 @@ static ssize_t store_voltage_table(struct cpufreq_policy *policy,
 				    omap_sr_enable(mpu_voltdm, vdata);
 				    pr_info("calibration reset for %s at %d.\n",
 					mpu_voltdm->name, policy->cur);
-				    //msleep(1000);
-				    //pr_info("[imoseyon] calibration should have finished.\n\n");
 				  } else
-				    pr_info("nominal volt too high - bailing!\n");
+				    pr_info("nominal voltage too high, bailing!\n");
 				}
 			}
 		}
